@@ -91,6 +91,14 @@ enum EFileFolderType {
                               | EFILEFOLDER_TYPE_ONBROWSE,
 };
 
+class CFileItem;
+
+/*!
+\brief A shared pointer to CFileItem
+\sa CFileItem
+*/
+typedef std::shared_ptr<CFileItem> CFileItemPtr;
+
 /*!
   \brief Represents a file on a share
   \sa CFileItemList
@@ -555,10 +563,19 @@ public:
   int m_iHasLock; // 0 - no lock 1 - lock, but unlocked 2 - locked
   int m_iBadPwdCount;
 
+  int m_lStackPartStartTime;
+  int m_lStackTotalTime;
+
   void SetCueDocument(const CCueDocumentPtr& cuePtr);
   void LoadEmbeddedCue();
   bool HasCueDocument() const;
   bool LoadTracksFromCueDocument(CFileItemList& scannedItems);
+
+  CFileItemPtr GetStack() const;
+  void SetStack(CFileItemPtr item);
+  int GetStackPartNumber() const;
+  void SetStackPartNumber(int partNumber);
+
 private:
   /*! \brief initialize all members of this class (not CGUIListItem members) to default values.
    Called from constructors, and from Reset()
@@ -600,14 +617,11 @@ private:
   EventPtr m_eventLogEntry;
   bool m_bIsAlbum;
 
+  int m_lStackPartNumber;
+  CFileItemPtr m_pStack;
+
   CCueDocumentPtr m_cueDocument;
 };
-
-/*!
-  \brief A shared pointer to CFileItem
-  \sa CFileItem
-  */
-typedef std::shared_ptr<CFileItem> CFileItemPtr;
 
 /*!
   \brief A vector of pointer to CFileItem

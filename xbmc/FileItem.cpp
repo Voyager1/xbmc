@@ -447,6 +447,11 @@ CFileItem& CFileItem::operator=(const CFileItem& item)
   m_specialSort = item.m_specialSort;
   m_bIsAlbum = item.m_bIsAlbum;
   m_doContentLookup = item.m_doContentLookup;
+
+  m_lStackPartNumber = item.m_lStackPartNumber;
+  m_lStackPartStartTime = item.m_lStackPartStartTime;
+  m_lStackTotalTime = item.m_lStackTotalTime;
+  m_pStack = item.m_pStack;
   return *this;
 }
 
@@ -473,6 +478,10 @@ void CFileItem::Initialize()
   m_bCanQueue = true;
   m_specialSort = SortSpecialNone;
   m_doContentLookup = true;
+  m_lStackPartNumber = 0;
+  m_lStackPartStartTime = 0;
+  m_lStackTotalTime = 0;
+  m_pStack.reset();
 }
 
 void CFileItem::Reset()
@@ -1854,6 +1863,26 @@ bool CFileItem::LoadTracksFromCueDocument(CFileItemList& scannedItems)
     }
   }
   return tracksFound != 0;
+}
+
+CFileItemPtr CFileItem::GetStack() const
+{
+  return m_pStack;
+}
+
+void CFileItem::SetStack(CFileItemPtr item)
+{
+  m_pStack = item;
+}
+
+int CFileItem::GetStackPartNumber() const
+{
+  return (m_pStack != nullptr) ? m_lStackPartNumber : 0;
+}
+
+void CFileItem::SetStackPartNumber(int partNumber)
+{
+  m_lStackPartNumber = partNumber;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

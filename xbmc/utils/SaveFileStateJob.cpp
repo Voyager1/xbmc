@@ -36,7 +36,6 @@
 #include "xbmc/music/tags/MusicInfoTag.h"
 
 void CSaveFileState::DoWork(CFileItem& item,
-                            CFileItem& item_discstack,
                             CBookmark& bookmark,
                             bool updatePlayCount)
 {
@@ -141,12 +140,10 @@ void CSaveFileState::DoWork(CFileItem& item,
           }
         }
 
-        // in order to properly update the the list, we need to update the stack item which is held in g_application.m_stackFileItemToUpdate
-        if (item.HasProperty("stackFileItemToUpdate"))
-        {
-          item = item_discstack; // as of now, the item is replaced by the discstack item
-          videodatabase.GetResumePoint(*item.GetVideoInfoTag());
-        }
+        // for ISO stacks, the bookmark is saved onto the part. In order to properly update the the list, we need to refresh the stack's resume point
+        if (item.GetStack() != nullptr && item.m_lStackTotalTime == 0)
+          videodatabase.GetResumePoint(*(item.GetStack()->GetVideoInfoTag()));
+
         videodatabase.Close();
 
         if (updateListing)
