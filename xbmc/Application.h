@@ -116,6 +116,74 @@ enum StartupAction
   STARTUP_ACTION_PLAY_RADIO
 };
 
+class CApplicationStackHelper
+{
+public:
+  CApplicationStackHelper(void);
+  ~CApplicationStackHelper(void);
+
+  void Clear();
+  bool InitializeStack(const CFileItem& item);
+  int InitializeStackStartPartAndOffset(const CFileItem& item);
+
+  int GetCurrentPartNumber() const { return m_currentStackPosition;  }
+
+  /*!
+  \brief Returns true if Application is currently playing an ISO stack
+  */
+  bool IsPlayingISOStack() const { return /*m_itemCurrentFile->IsStack() && */ m_currentStack->Size() > 0 && m_currentStackIsDiscImageStack; }
+
+  /*!
+  \brief Returns true if Application is currently playing a Regular (non-ISO) stack
+  */
+  bool IsPlayingRegularStack() const { return /*m_itemCurrentFile->IsStack() && */ m_currentStack->Size() > 0 && !m_currentStackIsDiscImageStack; }
+
+  /*!
+  \brief Returns a FileItem part of a (non-ISO) stack playback
+  \param partNumber the requested part number in the stack
+  */
+  CFileItem& GetStackPartFileItem(int partNumber) const { return  *(*m_currentStack)[partNumber]; }
+
+  bool HasNextStackPartFileItem() const { return m_currentStackPosition < m_currentStack->Size() - 1; }
+  CFileItem& SetNextStackPartCurrentFileItem() { return  GetStackPartFileItem(++m_currentStackPosition); }
+  CFileItem& SetStackPartCurrentFileItem(int partNumber) { return  GetStackPartFileItem(m_currentStackPosition = partNumber); }
+
+  /*!
+  \brief Returns the FileItem currently playing back as part of a (non-ISO) stack playback
+  */
+  CFileItem& GetCurrentStackPartFileItem() const { return GetStackPartFileItem(m_currentStackPosition); }
+
+  /*!
+  \brief Returns the end time of a FileItem part of a (non-ISO) stack playback
+  \param partNumber the requested part number in the stack
+  */
+  double GetStackPartEndTime(int partNumber) const { return GetStackPartFileItem(partNumber).m_lEndOffset; }
+
+  /*!
+  \brief Returns the start time of a FileItem part of a (non-ISO) stack playback
+  \param partNumber the requested part number in the stack
+  */
+  double GetStackPartStartTime(int partNumber) const { return (partNumber > 0) ? GetStackPartEndTime(partNumber - 1) : 0; }
+
+  double GetCurrentStackPartStartTime() const { return GetStackPartStartTime(m_currentStackPosition); }
+
+  /*!
+  \brief Returns the total time of a (non-ISO) stack playback
+  */
+  double GetStackTotalTime() const { return GetStackPartEndTime(m_currentStack->Size() - 1); }
+
+  /*!
+  \brief Returns the stack part number corresponding to the given timestamp in a (non-ISO) stack playback
+  \param seconds the requested timestamp in the stack (in seconds)
+  */
+  int GetStackPartNumberAtTime(double seconds);
+
+protected:
+  std::unique_ptr<CFileItemList> m_currentStack;
+  int m_currentStackPosition;
+  bool m_currentStackIsDiscImageStack;
+};
+
 class CApplication : public CXBApplicationEx, public IPlayerCallback, public IMsgTargetCallback,
                      public ISettingCallback, public ISettingsHandler, public ISubSettings,
                      public KODI::MESSAGING::IMessageTarget
@@ -381,50 +449,6 @@ public:
   */
   void UnlockFrameMoveGuard();
 
-  /*!
-  \brief Returns true if Application is currently playing an ISO stack
-  */
-  bool IsPlayingISOStack() const { return m_itemCurrentFile->IsStack() && m_currentStack->Size() > 0 && m_currentStackIsDiscImageStack; }
-
-  /*!
-  \brief Returns true if Application is currently playing a Regular (non-ISO) stack
-  */
-  bool IsPlayingRegularStack() const { return m_itemCurrentFile->IsStack() && m_currentStack->Size() > 0 && !m_currentStackIsDiscImageStack; }
-
-  /*!
-  \brief Returns a FileItem part of a (non-ISO) stack playback
-  \param partNumber the requested part number in the stack
-  */
-  CFileItem& GetStackPartFileItem(int partNumber) const { return  *(*m_currentStack)[partNumber]; }
-
-  /*!
-  \brief Returns the FileItem currently playing back as part of a (non-ISO) stack playback
-  */
-  CFileItem& GetStackPartCurrentFileItem() const { return GetStackPartFileItem(m_currentStackPosition); }
-
-  /*!
-  \brief Returns the end time of a FileItem part of a (non-ISO) stack playback
-  \param partNumber the requested part number in the stack
-  */
-  double GetStackPartEndTime(int partNumber) const { return GetStackPartFileItem(partNumber).m_lEndOffset; }
-
-  /*!
-  \brief Returns the start time of a FileItem part of a (non-ISO) stack playback
-  \param partNumber the requested part number in the stack
-  */
-  double GetStackPartStartTime(int partNumber) const { return (partNumber > 0) ? GetStackPartEndTime(partNumber - 1) : 0; }
-
-  /*!
-  \brief Returns the total time of a (non-ISO) stack playback
-  */
-  double GetStackTotalTime() const { return GetStackPartEndTime(m_currentStack->Size() - 1); }
-
-  /*!
-  \brief Returns the stack part number corresponding to the given timestamp in a (non-ISO) stack playback
-  \param seconds the requested timestamp in the stack (in seconds)
-  */
-  int GetStackPartNumberAtTime(double seconds);
-
 protected:
   bool OnSettingsSaving() const override;
 
@@ -488,15 +512,13 @@ protected:
   bool m_dpmsIsManual;
 
   CFileItemPtr m_itemCurrentFile;
-  std::unique_ptr<CFileItemList> m_currentStack;
-  bool m_currentStackIsDiscImageStack;
+  std::unique_ptr<CApplicationStackHelper> m_pStackHelper;
 
   std::string m_prevMedia;
   ThreadIdentifier m_threadID;       // application thread ID.  Used in applicationMessenger to know where we are firing a thread with delay from.
   bool m_bInitializing;
   bool m_bPlatformDirectories;
 
-  int m_currentStackPosition;
   int m_nextPlaylistItem;
 
   unsigned int m_lastRenderTime;
