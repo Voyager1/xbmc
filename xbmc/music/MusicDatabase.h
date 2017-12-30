@@ -143,7 +143,7 @@ public:
               const std::string &artistDisp, const std::string &artistSort,
               const std::vector<std::string>& genres,
               int iTrack, int iDuration, int iYear,
-              const int iTimesPlayed, int iStartOffset, int iEndOffset,
+              const int iTimesPlayed, int64_t iStartOffset, int64_t iEndOffset,
               const CDateTime& dtLastPlayed, float rating, int userrating, int votes,
               const ReplayGain& replayGain);
   bool GetSong(int idSong, CSong& song);
@@ -186,11 +186,11 @@ public:
                  const std::string &artistDisp, const std::string &artistSort,
                  const std::vector<std::string>& genres,
                  int iTrack, int iDuration, int iYear,
-                 int iTimesPlayed, int iStartOffset, int iEndOffset,
+                 int iTimesPlayed, int64_t iStartOffset, int64_t iEndOffset,
                  const CDateTime& dtLastPlayed, float rating, int userrating, int votes, const ReplayGain& replayGain);
 
   //// Misc Song
-  bool GetSongByFileName(const std::string& strFileName, CSong& song, int startOffset = 0);
+  bool GetSongByFileName(const std::string& strFileName, CSong& song, int64_t startOffset = 0);
   bool GetSongsByPath(const std::string& strPath, MAPSONGS& songs, bool bAppendToMap = false);
   bool Search(const std::string& search, CFileItemList &items);
   bool RemoveSongsFromPath(const std::string &path, MAPSONGS& songs, bool exact=true);
@@ -259,8 +259,8 @@ public:
   // Audiobook
   /////////////////////////////////////////////////
   bool AddAudioBook(const CFileItem& item);
-  bool SetResumeBookmarkForAudioBook(const CFileItem& item, int bookmark);
-  bool GetResumeBookmarkForAudioBook(const std::string& path, int& bookmark);
+  bool SetResumeBookmarkForAudioBook(const CFileItem& item, int64_t bookmark);
+  bool GetResumeBookmarkForAudioBook(const std::string& path, int64_t& bookmark);
 
   /*! \brief Checks if the given path is inside a folder that has already been scanned into the library
    \param path the path we want to check

@@ -41,7 +41,7 @@ public:
   \brief Initialize stack times for each part, start & end, total time, and current part number if resume offset is specified.
   \param item the FileItem object that is the stack
   */
-  int InitializeStackStartPartAndOffset(const CFileItem& item);
+  int64_t InitializeStackStartPartAndOffset(const CFileItem& item);
 
   /*!
   \brief returns the current part number

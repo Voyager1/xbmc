@@ -680,7 +680,7 @@ JSONRPC_STATUS CPlayerOperations::Open(const std::string &method, ITransportLaye
           else if (optionResume.isDouble())
             list[0]->SetProperty("StartPercent", optionResume);
           else if (optionResume.isObject())
-            list[0]->m_lStartOffset = (int)(ParseTimeInSeconds(optionResume) * 75.0);
+            list[0]->m_lStartOffset = static_cast<int64_t>(ParseTimeInSeconds(optionResume) * 75.0);
         }
 
         auto l = new CFileItemList(); //don't delete

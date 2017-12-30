@@ -94,10 +94,10 @@ bool CApplicationStackHelper::InitializeStack(const CFileItem & item)
   return true;
 }
 
-int CApplicationStackHelper::InitializeStackStartPartAndOffset(const CFileItem& item)
+int64_t CApplicationStackHelper::InitializeStackStartPartAndOffset(const CFileItem& item)
 {
   CVideoDatabase dbs;
-  int startoffset = 0;
+  int64_t startoffset = 0;
 
   // case 1: stacked ISOs
   if (m_currentStackIsDiscImageStack)
@@ -167,7 +167,7 @@ int CApplicationStackHelper::InitializeStackStartPartAndOffset(const CFileItem& 
       if (haveTimes)
       {
         // set end time in every part
-        GetStackPartFileItem(i).m_lEndOffset = static_cast<int>( times[i] * 75 / 1000);
+        GetStackPartFileItem(i).m_lEndOffset = (times[i] * 75 / 1000);
       }
       else
       {
@@ -179,7 +179,7 @@ int CApplicationStackHelper::InitializeStackStartPartAndOffset(const CFileItem& 
         }
         totalTimeMs += duration;
         // set end time in every part
-        GetStackPartFileItem(i).m_lEndOffset = static_cast<int>(totalTimeMs * 75 / 1000 );
+        GetStackPartFileItem(i).m_lEndOffset = (totalTimeMs * 75 / 1000);
         times.push_back(totalTimeMs);
       }
       // set start time in every part
@@ -217,7 +217,7 @@ int CApplicationStackHelper::InitializeStackStartPartAndOffset(const CFileItem& 
     }
 
     m_currentStackPosition = GetStackPartNumberAtTimeMs(msecs);
-    startoffset = static_cast<int>( (msecs - GetStackPartStartTimeMs(m_currentStackPosition)) * 75 / 1000);
+    startoffset = (msecs - GetStackPartStartTimeMs(m_currentStackPosition)) * 75 / 1000;
   }
   return startoffset;
 }

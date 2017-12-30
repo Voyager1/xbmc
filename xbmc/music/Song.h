@@ -186,8 +186,8 @@ public:
   int iTimesPlayed;
   CDateTime lastPlayed;
   CDateTime dateAdded;
-  int iStartOffset;
-  int iEndOffset;
+  int64_t iStartOffset;
+  int64_t iEndOffset;
   bool bCompilation;
   std::string strRecordLabel; // Record label from tag for album processing by CMusicInfoScanner::FileItemsToAlbums
   std::string strAlbumType; // (Musicbrainz release type) album type from tag for album processing by CMusicInfoScanner::FileItemsToAlbums

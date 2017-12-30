@@ -241,7 +241,7 @@ void CPlayListM3U::Save(const std::string& strFileName) const
       return; // error
     if (item->m_lStartOffset != 0 || item->m_lEndOffset != 0)
     {
-      strLine = StringUtils::Format("%s:%i,%i\n", OffsetMarker, item->m_lStartOffset, item->m_lEndOffset);
+      strLine = StringUtils::Format("%s:%lli,%lli\n", OffsetMarker, item->m_lStartOffset, item->m_lEndOffset);
       file.Write(strLine.c_str(),strLine.size());
     }
     std::string strFileName = ResolveURL(item);

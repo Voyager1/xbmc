@@ -775,7 +775,7 @@ void CGUIWindowMusicBase::GetContextButtons(int itemNumber, CContextButtons &but
         }
         if (item->IsAudioBook())
         {
-          int bookmark;
+          int64_t bookmark;
           if (m_musicdatabase.GetResumeBookmarkForAudioBook(item->GetPath(), bookmark) && bookmark > 0)
             buttons.Add(CONTEXT_BUTTON_RESUME_ITEM, 39016);
         }
@@ -906,7 +906,7 @@ bool CGUIWindowMusicBase::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
   case CONTEXT_BUTTON_RESUME_ITEM: //audiobooks
     {
       Update(item->GetPath());
-      int bookmark;
+      int64_t bookmark;
       m_musicdatabase.GetResumeBookmarkForAudioBook(item->GetPath(), bookmark);
       int i=0;
       while (i < m_vecItems->Size() && bookmark > m_vecItems->Get(i)->m_lEndOffset)

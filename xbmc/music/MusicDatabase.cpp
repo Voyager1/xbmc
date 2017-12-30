@@ -510,7 +510,7 @@ int CMusicDatabase::AddSong(const int idAlbum,
                             const std::string &artistDisp, const std::string &artistSort,
                             const std::vector<std::string>& genres,
                             int iTrack, int iDuration, int iYear,
-                            const int iTimesPlayed, int iStartOffset, int iEndOffset,
+                            const int iTimesPlayed, int64_t iStartOffset, int64_t iEndOffset,
                             const CDateTime& dtLastPlayed, float rating, int userrating, int votes,
                             const ReplayGain& replayGain)
 {
@@ -571,11 +571,11 @@ int CMusicDatabase::AddSong(const int idAlbum,
         strSQL += PrepareSQL(",'%s'", artistSort.c_str());
 
       if (dtLastPlayed.IsValid())
-        strSQL += PrepareSQL(",%i,%i,%i,'%s', %.1f, %i, %i, '%s','%s', '%s')",
+        strSQL += PrepareSQL(",%i,%lli,%lli,'%s', %.1f, %i, %i, '%s','%s', '%s')",
                       iTimesPlayed, iStartOffset, iEndOffset, dtLastPlayed.GetAsDBDateTime().c_str(), rating, userrating, votes, 
                       strComment.c_str(), strMood.c_str(), replayGain.Get().c_str());
       else
-        strSQL += PrepareSQL(",%i,%i,%i,NULL, %.1f, %i, %i,'%s', '%s', '%s')",
+        strSQL += PrepareSQL(",%i,%lli,%lli,NULL, %.1f, %i, %i,'%s', '%s', '%s')",
                       iTimesPlayed, iStartOffset, iEndOffset, rating, userrating, votes, strComment.c_str(), strMood.c_str(), replayGain.Get().c_str());
       m_pDS->exec(strSQL);
       idSong = (int)m_pDS->lastinsertid();
@@ -713,7 +713,7 @@ int CMusicDatabase::UpdateSong(int idSong,
                                const std::string &artistDisp, const std::string &artistSort,
                                const std::vector<std::string>& genres,
                                int iTrack, int iDuration, int iYear,
-                               int iTimesPlayed, int iStartOffset, int iEndOffset,
+                               int iTimesPlayed, int64_t iStartOffset, int64_t iEndOffset,
                                const CDateTime& dtLastPlayed, float rating, int userrating, int votes, 
                                const ReplayGain& replayGain)
 {
@@ -744,10 +744,10 @@ int CMusicDatabase::UpdateSong(int idSong,
   
 
   if (dtLastPlayed.IsValid())
-    strSQL += PrepareSQL(", iTimesPlayed = %i, iStartOffset = %i, iEndOffset = %i, lastplayed = '%s', rating = %.1f, userrating = %i, votes = %i, comment = '%s', mood = '%s', strReplayGain = '%s'",
+    strSQL += PrepareSQL(", iTimesPlayed = %i, iStartOffset = %lli, iEndOffset = %lli, lastplayed = '%s', rating = %.1f, userrating = %i, votes = %i, comment = '%s', mood = '%s', strReplayGain = '%s'",
                          iTimesPlayed, iStartOffset, iEndOffset, dtLastPlayed.GetAsDBDateTime().c_str(), rating, userrating, votes, strComment.c_str(), strMood.c_str(), replayGain.Get().c_str());
   else
-    strSQL += PrepareSQL(", iTimesPlayed = %i, iStartOffset = %i, iEndOffset = %i, lastplayed = NULL, rating = %.1f, userrating = %i, votes = %i, comment = '%s', mood = '%s', strReplayGain = '%s'",
+    strSQL += PrepareSQL(", iTimesPlayed = %i, iStartOffset = %lli, iEndOffset = %lli, lastplayed = NULL, rating = %.1f, userrating = %i, votes = %i, comment = '%s', mood = '%s', strReplayGain = '%s'",
                          iTimesPlayed, iStartOffset, iEndOffset, rating, userrating, votes, strComment.c_str(), strMood.c_str(), replayGain.Get().c_str());
   strSQL += PrepareSQL(" WHERE idSong = %i", idSong);
 
@@ -1998,8 +1998,8 @@ CSong CMusicDatabase::GetSongFromDataset(const dbiplus::sql_record* const record
   song.iTimesPlayed = record->at(offset + song_iTimesPlayed).get_asInt();
   song.lastPlayed.SetFromDBDateTime(record->at(offset + song_lastplayed).get_asString());
   song.dateAdded.SetFromDBDateTime(record->at(offset + song_dateAdded).get_asString());
-  song.iStartOffset = record->at(offset + song_iStartOffset).get_asInt();
-  song.iEndOffset = record->at(offset + song_iEndOffset).get_asInt();
+  song.iStartOffset = record->at(offset + song_iStartOffset).get_asInt64();
+  song.iEndOffset = record->at(offset + song_iEndOffset).get_asInt64();
   song.strMusicBrainzTrackID = record->at(offset + song_strMusicBrainzTrackID).get_asString();
   song.rating = record->at(offset + song_rating).get_asFloat();
   song.userrating = record->at(offset + song_userrating).get_asInt();
@@ -2038,9 +2038,9 @@ void CMusicDatabase::GetFileItemFromDataset(const dbiplus::sql_record* const rec
   item->GetMusicInfoTag()->SetReleaseDate(stTime);
   item->GetMusicInfoTag()->SetTitle(record->at(song_strTitle).get_asString());
   item->SetLabel(record->at(song_strTitle).get_asString());
-  item->m_lStartOffset = record->at(song_iStartOffset).get_asInt();
+  item->m_lStartOffset = record->at(song_iStartOffset).get_asInt64();
   item->SetProperty("item_start", item->m_lStartOffset);
-  item->m_lEndOffset = record->at(song_iEndOffset).get_asInt();
+  item->m_lEndOffset = record->at(song_iEndOffset).get_asInt64();
   item->GetMusicInfoTag()->SetMusicBrainzTrackID(record->at(song_strMusicBrainzTrackID).get_asString());
   item->GetMusicInfoTag()->SetRating(record->at(song_rating).get_asFloat());
   item->GetMusicInfoTag()->SetUserrating(record->at(song_userrating).get_asInt());
@@ -2210,7 +2210,7 @@ CArtist CMusicDatabase::GetArtistFromDataset(const dbiplus::sql_record* const re
   return artist;
 }
 
-bool CMusicDatabase::GetSongByFileName(const std::string& strFileNameAndPath, CSong& song, int startOffset)
+bool CMusicDatabase::GetSongByFileName(const std::string& strFileNameAndPath, CSong& song, int64_t startOffset)
 {
   song.Clear();
   CURL url(strFileNameAndPath);
@@ -2233,7 +2233,7 @@ bool CMusicDatabase::GetSongByFileName(const std::string& strFileNameAndPath, CS
                                  "where strFileName='%s' and strPath='%s'",
                                  strFileName.c_str(), strPath.c_str());
   if (startOffset)
-    strSQL += PrepareSQL(" AND iStartOffset=%i", startOffset);
+    strSQL += PrepareSQL(" AND iStartOffset=%lli", startOffset);
 
   int idSong = (int)strtol(GetSingleValue(strSQL).c_str(), NULL, 10);
   if (idSong > 0)
@@ -7592,7 +7592,7 @@ bool CMusicDatabase::AddAudioBook(const CFileItem& item)
   return ExecuteQuery(strSQL);
 }
 
-bool CMusicDatabase::SetResumeBookmarkForAudioBook(const CFileItem& item, int bookmark)
+bool CMusicDatabase::SetResumeBookmarkForAudioBook(const CFileItem& item, int64_t bookmark)
 {
   std::string strSQL = PrepareSQL("select bookmark from audiobook where file='%s'",
                                  item.GetPath().c_str());
@@ -7602,19 +7602,19 @@ bool CMusicDatabase::SetResumeBookmarkForAudioBook(const CFileItem& item, int bo
       return false;
   }
 
-  strSQL = PrepareSQL("UPDATE audiobook SET bookmark=%i WHERE file='%s'",
+  strSQL = PrepareSQL("UPDATE audiobook SET bookmark=%lli WHERE file='%s'",
                       bookmark, item.GetPath().c_str());
 
   return ExecuteQuery(strSQL);
 }
 
-bool CMusicDatabase::GetResumeBookmarkForAudioBook(const std::string& path, int& bookmark)
+bool CMusicDatabase::GetResumeBookmarkForAudioBook(const std::string& path, int64_t& bookmark)
 {
   std::string strSQL = PrepareSQL("SELECT bookmark FROM audiobook WHERE file='%s'",
                                  path.c_str());
   if (!m_pDS->query(strSQL.c_str()) || m_pDS->num_rows() == 0)
     return false;
 
-  bookmark = m_pDS->fv(0).get_asInt();
+  bookmark = m_pDS->fv(0).get_asInt64();
   return true;
 }
