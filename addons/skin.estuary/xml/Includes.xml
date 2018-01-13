@@ -930,15 +930,6 @@
 						<visible>Container.Filtered</visible>
 					</control>
 				</control>
-				<control type="button">
-					<top>0</top>
-					<width>200</width>
-					<height>100</height>
-					<label></label>
-					<onclick>Action(Back)</onclick>
-					<texturefocus />
-					<texturenofocus />
-				</control>
 				<control type="label" id="18900">
 					<top>50</top>
 					<label>$PARAM[sublabel]</label>
