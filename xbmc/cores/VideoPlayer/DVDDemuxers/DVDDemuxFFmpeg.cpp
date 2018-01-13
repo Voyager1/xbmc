@@ -228,14 +228,16 @@ bool CDVDDemuxFFmpeg::Open(std::shared_ptr<CDVDInputStream> pInput, bool streami
     StringUtils::ToLower(content);
 
     /* check if we can get a hint from content */
-    if     ( content.compare("video/x-vobsub") == 0 )
+    if (content.compare("video/x-vobsub") == 0)
       iformat = av_find_input_format("mpeg");
-    else if( content.compare("video/x-dvd-mpeg") == 0 )
+    else if (content.compare("video/x-dvd-mpeg") == 0)
       iformat = av_find_input_format("mpeg");
-    else if( content.compare("video/mp2t") == 0 )
+    else if (content.compare("video/mp2t") == 0)
       iformat = av_find_input_format("mpegts");
-    else if( content.compare("multipart/x-mixed-replace") == 0 )
+    else if (content.compare("multipart/x-mixed-replace") == 0)
       iformat = av_find_input_format("mjpeg");
+    else if (content.compare("audio/flac") == 0)
+      iformat = av_find_input_format("flac");
   }
 
   // open the demuxer
