@@ -2980,7 +2980,7 @@ bool CApplication::PlayMedia(const CFileItem& item, const std::string &player, i
 // A faster calculation of video time would improve this
 // substantially.
 // return value: same with PlayFile()
-bool CApplication::PlayStack(const CFileItem& item, bool bRestart)
+bool CApplication::PlayStack(CFileItem& item, bool bRestart)
 {
   if (!m_stackHelper.InitializeStack(item))
     return false;
@@ -2989,6 +2989,11 @@ bool CApplication::PlayStack(const CFileItem& item, bool bRestart)
 
   CFileItem selectedStackPart = m_stackHelper.GetCurrentStackPartFileItem();
   selectedStackPart.m_lStartOffset = startoffset;
+
+  std::string savedPlayerState = item.GetProperty("playerstate").asString();
+  if (!savedPlayerState.empty())
+    selectedStackPart.SetProperty("playerstate", savedPlayerState); // pass on to part
+  item.ClearProperty("playerstate");
 
   return PlayFile(selectedStackPart, "", true);
 }
@@ -3069,6 +3074,9 @@ bool CApplication::PlayFile(CFileItem item, const std::string& player, bool bRes
 
   options.starttime = CUtil::ConvertMilliSecsToSecs(item.m_lStartOffset);
 
+  std::string savedPlayerState = item.GetProperty("playerstate").asString();
+  item.ClearProperty("playerstate");
+
   if (bRestart)
   {
     // have to be set here due to playstack using this for starting the file
@@ -3085,10 +3093,15 @@ bool CApplication::PlayFile(CFileItem item, const std::string& player, bool bRes
       CVideoDatabase dbs;
       dbs.Open();
 
-      if( item.m_lStartOffset == STARTOFFSET_RESUME )
+      if( item.m_lStartOffset == STARTOFFSET_RESUME || !savedPlayerState.empty())
       {
         options.starttime = 0.0f;
-        if (item.IsResumePointSet())
+        if (!savedPlayerState.empty())
+        {
+          options.starttime = CUtil::ConvertMilliSecsToSecs(item.m_lStartOffset);
+          options.state = savedPlayerState;
+        }
+        else if (item.IsResumePointSet())
         {
           options.starttime = item.GetCurrentResumeTime();
           if (item.HasVideoInfoTag())

@@ -99,4 +99,5 @@ public:
   IPowerSyscall *m_instance;
   std::unique_ptr<CFileItem> m_lastPlayedFileItem;
   std::string m_lastUsedPlayer;
+  std::string m_lastPlayerState;
 };
