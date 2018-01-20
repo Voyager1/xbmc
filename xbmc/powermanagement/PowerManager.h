@@ -89,7 +89,7 @@ public:
 
   static void SettingOptionsShutdownStatesFiller(std::shared_ptr<const CSetting> setting, std::vector< std::pair<std::string, int> > &list, int &current, void *data);
 
-private:
+//private:
   void OnSleep() override;
   void OnWake() override;
   void OnLowBattery() override;

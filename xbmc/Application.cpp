@@ -4844,6 +4844,18 @@ bool CApplication::IsCurrentThread() const
 
 void CApplication::SetRenderGUI(bool renderGUI)
 {
+  if (renderGUI && !m_renderGUI)
+  {
+    // resume play
+    CServiceBroker::GetPowerManager().RestorePlayerState();
+  }
+  if (!renderGUI && m_renderGUI)
+  {
+    // stop play
+    CServiceBroker::GetPowerManager().StorePlayerState();
+    StopPlaying();
+  }
+
   if (renderGUI && ! m_renderGUI)
     g_windowManager.MarkDirty();
   m_renderGUI = renderGUI;
